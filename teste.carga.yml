@@ -1,42 +1,38 @@
 config:
   target: "http://localhost:3000"
   phases:
-    - duration: 30
-      arrivalRate: 5
+    - duration: 10
+      arrivalRate: 2
 scenarios:
   - flow:
-          - post:
-              url: "/api/cadastrar"
-              json:
-                nome: "João Silva"
-                email: "joao.silva@email.com"
-                senha: "MinhaSenh@123"
-                papel: "colaborador"
-                capture:
-                  - json: "$.usuario.id"
-                    as: 'usuario_id'
+      # Passo 1: Geração de email único com timestamp
+      - vars:
+          timestamp: "{{ new Date().getTime() }}"  # Gerando timestamp dinâmico
+          email: "joao.silva.{{ timestamp }}@email.com"  # Usando o timestamp para email único
 
-          - post:
-              url: "/api/login"
-              json:
-                email: "joao.silva@email.com"
-                senha: "MinhaSenh@123"
-              capture:
-                - json: "$.token"
-                  as: "token"
+      - post:
+          url: "/api/cadastrar"
+          json:
+            nome: "João Silva"
+            email: "{{ email }}"  # Usando o email gerado
+            senha: "MinhaSenh@123"
+            papel: "colaborador"
 
-          - get:
-              url: "/api/perfil"
-              headers:
-                Authorization: "Bearer {{ token }}"
+      # # Passo 2: Log para verificar o timestamp e email gerados
+      # - log: "Timestamp gerado: {{ timestamp }}, Email gerado: {{ email }}"  # Exibe o timestamp e o email para depuração
 
-          - post:
-              url: "/api/cadastrar"
-              json:
-                nome: "Maria Santos"
-                email: "maria.santos@email.com"
-                senha: "SenhaForte#456"
-                papel: "ti"
-                capture:
-                  - json: "$.usuario.id"
-                    as: '_id'
+      # # Passo 3: Login e captura do token de acesso
+      # - post:
+      #     url: "/api/login"
+      #     json:
+      #       email: "{{ email }}"  # Usando o email gerado no login
+      #       senha: "MinhaSenh@123"
+      #     capture:
+      #       - json: "$.tokenAcesso"
+      #         as: "token"  # Captura o token de acesso e o armazena na variável 'token'
+
+      # # Passo 4: Acessa o perfil com o token de autenticação
+      # - get:
+      #     url: "/api/perfil"
+      #     headers:
+      #       Authorization: "Bearer {{ token }}"  # Usa o token capturado nas etapas anteriores

@@ -6,14 +6,14 @@ class UsuarioController {
     static async cadastrar(req, res){
         // Criando o corpo da requisição para pode receber os valores
         try {
-            const { nome, id, email, senha, papel } = req.body;
+            const { nome, email, senha, papel } = req.body;
             // Verificação se todos os campos foram preenchidos
-            if( !id || !nome || !email || !senha || !papel){
+            if( !nome || !email || !senha || !papel){
                 return res.status(400).json({ msg: "Todos os campos devem ser preenchidos" })
             }
             // Agora irá iniciar a criptografia da senha
             const senhaCriptografada = await bcrypt.hash(senha, 15);
-            await Usuario.create({ nome, id, email,papel, senha: senhaCriptografada })
+            await Usuario.create({ nome, email,papel, senha: senhaCriptografada })
             res.status(200).json({msg: 'Usuario cadastrado com sucesso' })
         } catch (error) {
             res.status(500).json({ msg: "Erro ao cadastrar um novo usuario. Tente novamente mais tarde!", erro: error.message})
